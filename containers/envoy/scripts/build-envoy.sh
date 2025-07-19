@@ -129,7 +129,7 @@ build_envoy() {
     local build_cmd=(
         bazel build
         --config="${bazel_config}"
-        --config=arm64
+        --config=envoy-arm64
         --verbose_failures
         --show_timestamps
         //source/exe:envoy-static
