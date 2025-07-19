@@ -7,15 +7,6 @@ FROM ubuntu:22.04 as base
 ENV DEBIAN_FRONTEND=noninteractive
 ENV TZ=UTC
 
-# Add ARM64 architecture support first
-RUN dpkg --add-architecture arm64
-
-# Add LLVM/Clang repository for newer versions
-RUN apt-get update && apt-get install -y software-properties-common && \
-    wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | apt-key add - && \
-    add-apt-repository "deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy-18 main" && \
-    apt-get update
-
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
     # Build essentials
@@ -42,14 +33,14 @@ RUN apt-get update && apt-get install -y \
     linux-libc-dev-arm64-cross \
     binutils-aarch64-linux-gnu \
     \
-    # Alternative memory allocators (x86 versions only)
+    # Alternative memory allocators (available in Ubuntu 22.04)
     libgoogle-perftools-dev \
     libjemalloc-dev \
     \
-    # LLVM/Clang modern toolchain
-    clang-18 \
-    llvm-18 \
-    lld-18 \
+    # LLVM/Clang toolchain (available versions)
+    clang \
+    llvm \
+    lld \
     \
     # Build tools
     cmake \
