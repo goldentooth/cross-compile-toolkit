@@ -45,6 +45,7 @@ RUN apt-get update && apt-get install -y \
     # Build tools
     cmake \
     ninja-build \
+    file \
     \
     && rm -rf /var/lib/apt/lists/*
 
