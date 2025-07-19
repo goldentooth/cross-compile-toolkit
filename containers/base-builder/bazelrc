@@ -1,0 +1,52 @@
+# Bazel configuration for ARM64 cross-compilation
+
+# ARM64 cross-compilation platform
+build:arm64 --platforms=@io_bazel_rules_go//go/toolchain:linux_arm64
+build:arm64 --cpu=aarch64
+build:arm64 --crosstool_top=@bazel_tools//tools/cpp:toolchain
+build:arm64 --host_crosstool_top=@bazel_tools//tools/cpp:toolchain
+
+# Use system-installed cross-compilation toolchain
+build:arm64 --action_env=CC=aarch64-linux-gnu-gcc
+build:arm64 --action_env=CXX=aarch64-linux-gnu-g++
+build:arm64 --action_env=AR=aarch64-linux-gnu-ar
+build:arm64 --action_env=STRIP=aarch64-linux-gnu-strip
+
+# Resource limits for container builds
+build --local_ram_resources=12288
+build --local_cpu_resources=8
+build --jobs=8
+
+# Enable disk cache
+build --disk_cache=/tmp/bazel-cache
+
+# Debugging and verbosity
+build --verbose_failures
+build --verbose_explanations
+
+# Common flags for all builds
+build --show_timestamps
+build --sandbox_debug
+build --workspace_status_command=/usr/local/bin/workspace_status.sh
+
+# Envoy-specific optimizations
+build:envoy --define tcmalloc=disabled
+build:envoy --define signal_trace=disabled
+build:envoy --define hot_restart=disabled
+build:envoy --define google_grpc=disabled
+build:envoy --copt=-march=armv8-a
+
+# Alternative memory allocator options
+build:gperftools --define tcmalloc=gperftools
+build:jemalloc --define tcmalloc=jemalloc
+
+# Release build optimizations
+build:release --compilation_mode=opt
+build:release --strip=always
+build:release --copt=-O3
+build:release --linkopt=-s
+
+# Debug build options
+build:debug --compilation_mode=dbg
+build:debug --strip=never
+build:debug --copt=-g3

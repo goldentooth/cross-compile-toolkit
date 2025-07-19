@@ -1,0 +1,33 @@
+# Patch for Raspberry Pi compatibility
+# Addresses tcmalloc memory alignment issues and ARM64 optimizations
+
+--- a/bazel/envoy_build_system.bzl
++++ b/bazel/envoy_build_system.bzl
+@@ -100,6 +100,11 @@ def envoy_cc_binary(
+         deps = deps,
+         **kwargs
+     )
++    
++    # ARM64/Raspberry Pi specific optimizations
++    if select({"//bazel:linux_aarch64": True, "//conditions:default": False}):
++        linkopts = linkopts + ["-Wl,--gc-sections"]
++        copts = copts + ["-march=armv8-a", "-mtune=cortex-a72"]
+ 
+ def envoy_cc_library(
+     name,
+
+--- a/source/common/memory/heap_shrinker.cc
++++ b/source/common/memory/heap_shrinker.cc
+@@ -15,6 +15,12 @@ namespace Memory {
+ void HeapShrinker::shrinkHeap() {
+ #ifdef TCMALLOC
+   // Only attempt to shrink heap if tcmalloc is enabled
++#ifdef __aarch64__
++  // Skip heap shrinking on ARM64 to avoid memory alignment issues
++  // See: https://github.com/envoyproxy/envoy/issues/23339
++  ENVOY_LOG(debug, "Skipping heap shrink on ARM64 platform");
++  return;
++#endif
+   MallocExtension::instance()->ReleaseFreeMemory();
+ #endif
+ }

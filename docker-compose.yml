@@ -1,0 +1,104 @@
+version: '3.8'
+
+services:
+  # Base cross-compilation environment
+  base-builder:
+    build:
+      context: containers/base-builder
+      dockerfile: Dockerfile
+    image: goldentooth/base-builder:latest
+    container_name: goldentooth-base-builder
+    volumes:
+      - ./artifacts:/artifacts
+      - bazel-cache:/tmp/bazel-cache
+    environment:
+      - TERM=xterm-256color
+    working_dir: /workspace
+    command: /bin/bash
+    stdin_open: true
+    tty: true
+
+  # Envoy builder environment
+  envoy-builder:
+    build:
+      context: containers/envoy
+      dockerfile: Dockerfile
+      args:
+        - ENVOY_VERSION=v1.32.0
+        - MEMORY_ALLOCATOR=disabled
+    image: goldentooth/envoy-builder:latest
+    container_name: goldentooth-envoy-builder
+    depends_on:
+      - base-builder
+    volumes:
+      - ./artifacts:/artifacts
+      - bazel-cache:/tmp/bazel-cache
+      - envoy-source:/workspace/envoy
+    environment:
+      - ENVOY_VERSION=v1.32.0
+      - MEMORY_ALLOCATOR=disabled
+      - BUILD_CONFIG=release
+      - PARALLEL_JOBS=4
+    working_dir: /workspace/envoy
+    command: /usr/local/bin/build-envoy.sh
+    profiles:
+      - build
+
+  # Development environment for interactive building
+  dev-environment:
+    build:
+      context: containers/base-builder
+      dockerfile: Dockerfile
+    image: goldentooth/base-builder:latest
+    container_name: goldentooth-dev-env
+    volumes:
+      - ./:/workspace/toolkit
+      - ./artifacts:/artifacts
+      - bazel-cache:/tmp/bazel-cache
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - TERM=xterm-256color
+    working_dir: /workspace/toolkit
+    command: /bin/bash
+    stdin_open: true
+    tty: true
+    profiles:
+      - dev
+
+  # CI builder (minimal environment for GitHub Actions)
+  ci-builder:
+    build:
+      context: containers/ci-builder
+      dockerfile: Dockerfile
+    image: goldentooth/ci-builder:latest
+    container_name: goldentooth-ci-builder
+    volumes:
+      - ./artifacts:/artifacts
+    environment:
+      - CI=true
+    profiles:
+      - ci
+
+  # Test runner for validating cross-compiled binaries
+  test-runner:
+    image: arm64v8/ubuntu:22.04
+    platform: linux/arm64
+    container_name: goldentooth-test-runner
+    volumes:
+      - ./artifacts:/artifacts:ro
+      - ./tests:/tests:ro
+    working_dir: /tests
+    command: /tests/test-binaries.sh
+    profiles:
+      - test
+
+volumes:
+  bazel-cache:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /tmp/goldentooth-bazel-cache
+  
+  envoy-source:
+    driver: local

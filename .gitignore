@@ -1,0 +1,52 @@
+# Build artifacts
+artifacts/
+!artifacts/.gitkeep
+
+# Bazel
+bazel-*
+.bazel-*
+
+# Docker
+.docker/
+
+# Temporary files
+*.tmp
+*.log
+/tmp/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Cache directories
+node_modules/
+__pycache__/
+*.pyc
+
+# Local configuration
+.env
+.env.local
+docker-compose.override.yml
+
+# Test outputs
+test-results/
+coverage/
+
+# Packer
+packer_cache/
+*.box
+
+# Ansible
+*.retry
+.vault_pass
+
+# Local development
+/workspace/
+/build/

@@ -1,0 +1,70 @@
+# Envoy-specific Bazel configuration for ARM64 cross-compilation
+# Addresses Raspberry Pi tcmalloc memory alignment issues
+
+# Import base cross-compilation config
+import %workspace%/../base-builder/bazelrc
+
+# Envoy-specific ARM64 build configuration
+build:envoy-arm64 --config=arm64
+build:envoy-arm64 --platforms=@envoy//bazel:linux_aarch64
+
+# Memory allocator configurations for Raspberry Pi compatibility
+build:envoy-disabled-tcmalloc --define tcmalloc=disabled
+build:envoy-gperftools --define tcmalloc=gperftools  
+build:envoy-jemalloc --define tcmalloc=jemalloc
+
+# Disable problematic features on ARM64
+build:envoy-arm64 --define signal_trace=disabled
+build:envoy-arm64 --define hot_restart=disabled
+build:envoy-arm64 --define google_grpc=disabled
+
+# Raspberry Pi CPU optimizations (Cortex-A72)
+build:envoy-arm64 --copt=-march=armv8-a
+build:envoy-arm64 --copt=-mtune=cortex-a72
+build:envoy-arm64 --copt=-mfix-cortex-a53-835769
+build:envoy-arm64 --copt=-mfix-cortex-a53-843419
+
+# Memory and performance optimizations
+build:envoy-arm64 --copt=-DMEMORY_LIMITED_BUILD
+build:envoy-arm64 --linkopt=-Wl,--gc-sections
+build:envoy-arm64 --linkopt=-Wl,--icf=all
+
+# Release build optimizations
+build:envoy-arm64-release --config=envoy-arm64
+build:envoy-arm64-release --config=envoy-disabled-tcmalloc
+build:envoy-arm64-release --compilation_mode=opt
+build:envoy-arm64-release --strip=always
+build:envoy-arm64-release --copt=-O3
+build:envoy-arm64-release --copt=-DNDEBUG
+build:envoy-arm64-release --copt=-fomit-frame-pointer
+build:envoy-arm64-release --linkopt=-s
+
+# Debug build configuration
+build:envoy-arm64-debug --config=envoy-arm64
+build:envoy-arm64-debug --config=envoy-disabled-tcmalloc
+build:envoy-arm64-debug --compilation_mode=dbg
+build:envoy-arm64-debug --strip=never
+build:envoy-arm64-debug --copt=-g3
+build:envoy-arm64-debug --copt=-O0
+
+# Test configuration for ARM64
+test:envoy-arm64 --config=envoy-arm64
+test:envoy-arm64 --test_env=ENVOY_IP_TEST_VERSIONS=v4only
+
+# Common build options
+build --workspace_status_command=/usr/local/bin/workspace_status.sh
+build --show_timestamps
+build --verbose_failures
+build --action_env=BAZEL_LINKLIBS=-l%:libstdc++.a
+build --action_env=BAZEL_LINKOPTS=-lm:-lpthread
+
+# Disable features that cause issues on ARM64
+build --define wasm=disabled
+build --define admin_html=disabled
+
+# Repository configuration
+build --repository_cache=/tmp/bazel-repo-cache
+build --experimental_repository_cache_hardlinks
+
+# Network timeouts for dependency downloads
+build --repository_rule_timeout=600
