@@ -59,8 +59,8 @@ ENV SYSROOT=/usr/aarch64-linux-gnu
 ENV PKG_CONFIG_PATH=/usr/aarch64-linux-gnu/lib/pkgconfig
 ENV PKG_CONFIG_LIBDIR=/usr/aarch64-linux-gnu/lib/pkgconfig
 
-# Install Bazel (latest stable version)
-ARG BAZEL_VERSION=7.0.0
+# Install Bazel (compatible with Envoy v1.32.0)
+ARG BAZEL_VERSION=6.5.0
 RUN wget -O bazel-installer.sh \
     "https://github.com/bazelbuild/bazel/releases/download/${BAZEL_VERSION}/bazel-${BAZEL_VERSION}-installer-linux-x86_64.sh" && \
     chmod +x bazel-installer.sh && \
