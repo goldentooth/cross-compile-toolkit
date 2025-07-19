@@ -40,8 +40,9 @@ RUN apt-get update && apt-get install -y \
     libbz2-dev \
     liblzma-dev \
     \
-    # Additional cross-compilation support
-    gcc-multilib \
+    # Cross-compilation toolchain
+    gcc-aarch64-linux-gnu \
+    g++-aarch64-linux-gnu \
     \
     && rm -rf /var/lib/apt/lists/*
 
