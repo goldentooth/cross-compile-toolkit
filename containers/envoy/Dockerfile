@@ -27,13 +27,10 @@ RUN apt-get update && apt-get install -y \
     \
     # Networking libraries
     libpcre3-dev \
-    libpcre3-dev:arm64 \
     \
     # Compression libraries  
     libbz2-dev \
-    libbz2-dev:arm64 \
     liblzma-dev \
-    liblzma-dev:arm64 \
     \
     # Additional cross-compilation support
     gcc-multilib \
