@@ -14,6 +14,14 @@ ENV MEMORY_ALLOCATOR=${MEMORY_ALLOCATOR}
 # Switch to root for package installation
 USER root
 
+# Ensure cross-compilation environment is preserved from base image
+ENV CROSS_COMPILE=aarch64-linux-gnu-
+ENV CC=aarch64-linux-gnu-gcc
+ENV CXX=aarch64-linux-gnu-g++
+ENV AR=aarch64-linux-gnu-ar
+ENV STRIP=aarch64-linux-gnu-strip
+ENV PATH=/usr/bin:$PATH
+
 # Install additional dependencies for Envoy
 RUN apt-get update && apt-get install -y \
     # Additional build tools for Envoy
