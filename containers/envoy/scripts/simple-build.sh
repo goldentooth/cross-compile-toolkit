@@ -19,8 +19,21 @@ build --action_env=CXX=aarch64-linux-gnu-g++
 build --action_env=AR=aarch64-linux-gnu-ar
 build --action_env=STRIP=aarch64-linux-gnu-strip
 
+# Go cross-compilation settings for ARM64
+build --action_env=GOARCH=arm64
+build --action_env=GOOS=linux
+build --action_env=CGO_ENABLED=1
+build --action_env=CC_FOR_TARGET=aarch64-linux-gnu-gcc
+build --action_env=CXX_FOR_TARGET=aarch64-linux-gnu-g++
+
 # Disable tcmalloc for Raspberry Pi compatibility
 build --define tcmalloc=${MEMORY_ALLOCATOR:-disabled}
+
+# Disable problematic features for cross-compilation
+build --define wasm=disabled
+build --define admin_html=disabled
+build --define signal_trace=disabled
+build --define hot_restart=disabled
 
 # Optimizations
 build --copt=-O3
