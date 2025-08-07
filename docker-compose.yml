@@ -79,6 +79,27 @@ services:
     profiles:
       - ci
 
+  # Distributed-llama builder environment
+  distributed-llama-builder:
+    build:
+      context: containers/distributed-llama
+      dockerfile: Dockerfile
+      args:
+        - DISTRIBUTED_LLAMA_VERSION=main
+    image: goldentooth/distributed-llama-builder:latest
+    container_name: goldentooth-distributed-llama-builder
+    volumes:
+      - ./artifacts:/artifacts
+      - bazel-cache:/tmp/bazel-cache
+    environment:
+      - DISTRIBUTED_LLAMA_VERSION=main
+      - BUILD_CONFIG=release
+      - PARALLEL_JOBS=4
+    working_dir: /workspace
+    command: /usr/local/bin/build-distributed-llama.sh
+    profiles:
+      - build
+
   # Test runner for validating cross-compiled binaries
   test-runner:
     image: arm64v8/ubuntu:22.04

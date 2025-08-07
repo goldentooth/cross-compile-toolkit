@@ -32,6 +32,7 @@ build:
 	@echo "🔨 Building cross-compilation containers..."
 	docker compose build base-builder
 	docker compose build envoy-builder
+	docker compose build distributed-llama-builder
 
 # Test cross-compilation environment
 test:
@@ -71,11 +72,19 @@ envoy-test:
 		arm64v8/ubuntu:22.04 \
 		/usr/local/bin/envoy-$(ENVOY_VERSION)-arm64 --version
 
+# Build distributed-llama ARM64
+distributed-llama-build:
+	@echo "🏗️  Building distributed-llama for ARM64..."
+	@echo "   Version: main"
+	@echo "   Build config: release"
+	docker compose --profile build run --rm distributed-llama-builder
+
 # Quick build for development
 quick-build:
 	@echo "⚡ Quick build for development..."
 	docker build -t goldentooth/base-builder:dev containers/base-builder/
 	docker build -t goldentooth/envoy-builder:dev containers/envoy/
+	docker build -t goldentooth/distributed-llama-builder:dev containers/distributed-llama/
 
 # Deploy artifacts (placeholder for Ansible integration)
 deploy:
